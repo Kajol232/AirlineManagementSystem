@@ -1,112 +1,175 @@
 package com.company;
 
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Scanner;
 
+
 public class Seat {
-    final int FIRST = 1;
-    final int BUSINESS = 2;
-    final int ECONOMY = 3;
-    private int seatClass;
-    private int capacity = 100;
-    boolean[] arrSeats = new boolean[capacity];
+    final String FIRST_CLASS = "FirstClass";
+    final String ECONOMY = "Economy";
+    final String BUSINESS = "Business";
+    PreparedStatement preparedStatement = null;
+    ResultSet rs = null;
 
-    public Seat(int seatClass, String flightcode) {
-        this.seatClass = seatClass;
-        this.capacity = capacity;
+    private final String flightId;
+    Connection con;
+
+    Scanner input = new Scanner(System.in);
+
+
+
+    public Seat(String flightId, Connection con) {
+
+        this.flightId = flightId;
+        this.con = con;
+
+
     }
 
-    public int getSeatClass() {
-        return seatClass;
-    }
 
-    public void setSeatClass(int seatClass) {
-        this.seatClass = seatClass;
-    }
 
-    public int getCapacity() {
-        return capacity;
-    }
-
-    public void setCapacity(int capacity) {
-        this.capacity = capacity;
-    }
-    public int assignSeat(int section){
-
+    public int assignSeat(String section){
         switch (section){
-            case FIRST:
-                if(getFreeSeats(section)> 0){
-                    for (int i = 0; i < 10 ; i++)
-                        if (arrSeats[i] == false){
-                            arrSeats[i] = true;
-                            return i;
+            case FIRST_CLASS:
+                try {
+                    preparedStatement = con.prepareStatement("select * from seats where flightid =?");
+                    preparedStatement.setString(1,flightId);
+                    rs = preparedStatement.executeQuery();
+                    while (rs.next()) {
+                        int seatNum = rs.getInt(2);
+                        if(seatNum > 0){
+                        updateSeat(flightId, seatNum, section);
+                        return seatNum;
+                        }else{
+                            selectOtherSection(section);
                         }
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+                break;
+            case ECONOMY:
+                try {
+                    preparedStatement = con.prepareStatement("select * from seats where flightid =?");
+                    preparedStatement.setString(1,flightId);
+                    rs = preparedStatement.executeQuery();
+                    while (rs.next()) {
+                        int seatNum = rs.getInt(4);
+                        if(seatNum > 0) {
+                            updateSeat(flightId, seatNum, section);
+                            return seatNum;
+                        }else{
+                            selectOtherSection(section);
+                        }
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+                break;
+            case BUSINESS:
+                try {
+                    preparedStatement = con.prepareStatement("select * from seats where flightid =?");
+                    preparedStatement.setString(1,flightId);
+                    rs = preparedStatement.executeQuery();
+                    while (rs.next()) {
+                        int seatNum = rs.getInt(3);
+                        if (seatNum > 0) {
+                            updateSeat(flightId, seatNum, section);
+                            return seatNum;
+                        }else{
+                            selectOtherSection(section);
+                        }
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+                break;
+            default:
+                System.out.println("Invalid section selected");
+        }
+
+        return 0;
+    }
+
+    //Add code for checking payment for section change.
+    private void selectOtherSection(String section){
+        String selection;
+        System.out.println("All seats in section " + section + " are booked; Kindly select another section");
+        if(section.equals(FIRST_CLASS)){
+            System.out.println("1. Economy");
+            System.out.println("2. Business");
+            int choice = input.nextInt();
+           selection = getSection(choice,"Economy", "Business");
+           assignSeat(selection);
+        }else if(section. equals(BUSINESS)){
+            System.out.println("1. FirstClass");
+            System.out.println("2. Economy");
+            int choice = input.nextInt();
+            selection = getSection(choice,"FirsClass", "Economy");
+            assignSeat(selection);
+        }else {
+            System.out.println("1. Economy");
+            System.out.println("2. FirstClass");
+            int choice = input.nextInt();
+            selection = getSection(choice,"Economy", "FirsClass");
+            assignSeat(selection);
+        }
+    }
+
+    private  void updateSeat(String id, int seat, String section){
+        seat -= 1;
+        switch (section) {
+            case FIRST_CLASS:
+                try {
+                    preparedStatement = con.prepareStatement("update seats set firstclass = ? where flightid = ? ");
+                    preparedStatement.setInt(1, seat);
+                    preparedStatement.setString(2, id);
+                    preparedStatement.executeUpdate();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                break;
+            case BUSINESS:
+                try {
+                    preparedStatement = con.prepareStatement("update seats set business = ? where flightid = ? ");
+                    preparedStatement.setInt(1, seat);
+                    preparedStatement.setString(2, id);
+                    preparedStatement.executeUpdate();
+                } catch (SQLException e) {
+                    e.printStackTrace();
                 }
                 break;
             case ECONOMY:
-                if(getFreeSeats(section)> 0){
-                    for (int i = 10; i < 60 ; i++)
-                        if (arrSeats[i] == false){
-                            arrSeats[i] = true;
-                            return i;
-                        }
-                }
-                break;
-
-            case BUSINESS:
-                if(getFreeSeats(section)> 0){
-                    for (int i = 60; i < arrSeats.length ; i++)
-                        if (arrSeats[i] == false){
-                            arrSeats[i] = true;
-                            return i;
-                        }
+                try {
+                    preparedStatement = con.prepareStatement("update seats set economy = ? where flightid = ? ");
+                    preparedStatement.setInt(1, seat);
+                    preparedStatement.setString(2, id);
+                    preparedStatement.executeUpdate();
+                } catch (SQLException e) {
+                    e.printStackTrace();
                 }
                 break;
             default:
-                System.out.printf("All seats in section \"%s\" are booked.\n", section);
-                System.out.printf("Would you like to be moved to another section"+ "Y or N");
-                Scanner sc = new Scanner(System.in);
-                if(sc.next().charAt(0) == 'y'){
-                    System.out.println("1. Firstclass");
-                    System.out.println("2. Business");
-                    System.out.println("3. Economy");
-                    int i = sc.nextInt();
-                    assignSeat(i);
-                }
-                else{
-                    System.out.println("\nNext flight leaves in 3 hours.\n");}
 
         }
-        return Integer.parseInt(null);
+    }
+    private String getSection(int choice, String section1, String section2){
+        if (choice == 1){
+            return section1;
+        }else if(choice == 2){
+            return section2;
+        }else
+        return "invalid Selection";
     }
 
-    private int getFreeSeats(int section){
-        int total = 0;
-        switch (section){
-            case FIRST:
-                for(int i=0; i<10; i++){
-                    if(arrSeats[i] == false)
-                        total += 1;
-                }
-            case BUSINESS:
-                for(int i=10; i<60; i++){
-                    if(arrSeats[i] == false)
-                    total += 1;
-            }
-            case ECONOMY:
-                for(int i=60; i<arrSeats.length; i++){
-                    if(arrSeats[i] == false)
-                        total += 1;
-                }
-        }
-        return total;
-    }
-    public boolean seatsAvailable(){
-        for(boolean seat : arrSeats)
-            if(seat == false)
-                return true;
 
-        return false;
-    }
 }
 
 

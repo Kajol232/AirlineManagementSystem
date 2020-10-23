@@ -1,24 +1,40 @@
 package com.company;
 
+import java.sql.Time;
+
 public class Booking {
     private String nameOfPassenger;
     private String typeOfFlight;
-    private int classOfFlight;
+    private String classOfFlight;
     private String destination;
     private String departure;
     private String dateOfFlight;
-   private  String bookingId;
+    private final Time time;
+   private final String passengerId;
+   private  String ticketId;
 
 
-    public Booking(String nameOfPassenger, String typeOfFlight, int classOfFlight, String dateOfFlight, String destination, String departure) {
+    public Booking(String ticketId,String passengerId, String nameOfPassenger, String destination, String departure, String dateOfFlight, Time time, String typeOfFlight, String classOfFlight  ) {
+        this.ticketId = ticketId;
+        this.passengerId = passengerId;
         this.nameOfPassenger = nameOfPassenger;
+        this.time = time;
         this.typeOfFlight = typeOfFlight;
         this.classOfFlight = classOfFlight;
         this.dateOfFlight = dateOfFlight;
         this.destination = destination;
         this.departure = departure;
-        bookingId = setBookingCode(nameOfPassenger);
 
+
+
+    }
+
+    public String getTicketId() {
+        return ticketId;
+    }
+
+    public void setTicketId(String ticketId) {
+        this.ticketId = ticketId;
     }
 
     public String getTypeOfFlight() {
@@ -29,11 +45,11 @@ public class Booking {
         this.typeOfFlight = typeOfFlight;
     }
 
-    public int getClassOfFlight() {
+    public String getClassOfFlight() {
         return classOfFlight;
     }
 
-    public void setClassOfFlight(int classOfFlight) {
+    public void setClassOfFlight(String classOfFlight) {
         this.classOfFlight = classOfFlight;
     }
 
@@ -43,10 +59,6 @@ public class Booking {
 
     public void setDateOfFlight(String dateOfFlight) {
         this.dateOfFlight = dateOfFlight;
-    }
-
-    public String getBookingId() {
-        return bookingId;
     }
 
     public String getDestination() {
@@ -73,20 +85,11 @@ public class Booking {
         this.nameOfPassenger = nameOfPassenger;
     }
 
-    public String setBookingCode(String nameOfPassenger){
-        CodeGenerator gen = new CodeGenerator();
-        String code = gen.genBookingCode(nameOfPassenger);
-
-        return code;
+    public Time getTime() {
+        return time;
     }
 
-    public String assignFlighttoBook(){
-        Flight flight = new Flight(departure, destination);
-        String code = flight.generateFlightCode(destination);
-        Seat seat = new Seat(classOfFlight,code);
-        if(seat.seatsAvailable()){
-            return code;
-        }
-       return "No seat available";
+    public String getPassengerId() {
+        return passengerId;
     }
 }

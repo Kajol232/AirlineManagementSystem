@@ -1,61 +1,64 @@
 package com.company;
-import javax.swing.*;
-import java.sql.Time;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.logging.SimpleFormatter;
+
+import java.sql.*;
+import java.util.Scanner;
+
 
 public class Main {
 
-    public static void main(String[] args) throws ParseException {
-        final int SEARCH_FLIGHT = 1;
-        final int BOOK_FLIGHT = 2;
+    public static void main(String[] args) {
+        System.out.println("            Airline Management System");
+        System.out.println("*********************************************************");
+        System.out.println("Welcome,Kindly select operations to perform");
+        System.out.println("0. Exit");
+        System.out.println("1. Manage Aircraft");
+        System.out.println("2. Manage Flight");
+        System.out.println("3. Manage Booking");
+        System.out.println("4. Manage Passenger");
 
         Scanner input = new Scanner(System.in);
-        System.out.println("Welcome, Kindly Book Your Flight");
-        System.out.println("Kindly select any of the option listed below");
-        System.out.println("0. Exit");
-        System.out.println("1. Search for a Flight");
-        System.out.println("2. Book a Flight");
-
         int operation = input.nextInt();
 
-        switch (operation){
+            switch (operation) {
 
-            case SEARCH_FLIGHT:
-                System.out.println("Kindly input flight name");
-                String query = input.nextLine();
+                case 1:
+                    AircraftMenu aircraftMenu = new AircraftMenu(connection());
+                    aircraftMenu.process();
+                    break;
 
-            break;
+                case 2:
+                    FlightMenu flightMenu = new FlightMenu(connection());
+                    flightMenu.process();
+                    break;
 
-            case BOOK_FLIGHT:
+                case 3:
+                    BookingMenu bookingMenu = new BookingMenu(connection());
+                    bookingMenu.process();
+                    break;
 
-        System.out.println("What's your name?");
-        String passengerName =input.next();
-        System.out.println("What's your takeoff point?");
-        String departure = input.next();
-        System.out.println("Where are you going?");
-        String destination = input.next();
-       // SimpleDateFormat formatter = new SimpleDateFormat("dd/mm/yy");
-        System.out.println("When are you going?(dd/mm/yy)");
-        String dateOfDeparture = input.next();
-        //Date date = formatter.parse(dateOfDeparture);
-        System.out.println("One-way or Return ticket?");
-        String typeOfFlight = input.next();
-        System.out.println("1.FirstClass" +
-                            "2. Business " +
-                            "3. Economy?");
-      int classOfFlight = input.nextInt();
-        Booking book = new Booking(passengerName,typeOfFlight,classOfFlight,dateOfDeparture,departure,destination);
-       book.setBookingCode(passengerName);
-                String code = book.getBookingId();
-        String flightId = book.assignFlighttoBook();
-        Seat seat = new Seat(classOfFlight,flightId);
-        int seatNum = seat.assignSeat(classOfFlight);
-                System.out.println("Dear " + passengerName + ", your booking id is " + code + " and you are on Flight "
-                        + flightId + " with seat no " + seatNum);
+                case 4:
+                    PassengerMenu passengerMenu = new PassengerMenu(connection());
+                    passengerMenu.process();
+                    break;
+
+                case 0:
+                    System.exit(0);
+                    break;
+
+                default:
+                    System.out.println("invalid operation");
+                    System.out.println("input option 1-4 to perform an operation; 0 to quit");
+            }
         }
-
+    private static Connection connection(){
+        Connection con;
+        try {
+            con = DriverManager.getConnection("jdbc:sqlite:c://sqlite//AirlineMgt_db.db");
+            System.out.println("Database connected");
+            return con;
+        } catch (SQLException a) {
+            a.printStackTrace();
+        }
+        return null;
     }
 }

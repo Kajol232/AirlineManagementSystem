@@ -1,48 +1,42 @@
 package com.company;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.sql.Time;
-import java.util.Random;
 
 public class Flight {
     private String departure, destination;
-    private Aircraft aircraft;
+    private final String aircraftModel;
     private Time departureTime;
-    private  String code;
-    public Flight(String departure, String destination, Time departureTime, Aircraft aircraft, String code) {
+    private String date;
+    private int capacity;
+
+    public Flight(String departure, String destination, Time departureTime,String date,
+                  String aircraftModel) {
 
         this.departure = departure;
         this.destination = destination;
         this.departureTime = departureTime;
-        this.aircraft=aircraft;
-        this.code = code;
+        this.aircraftModel = aircraftModel;
+        this.date = date;
     }
 
-    public Flight(String departure, String destination) {
-        this.departure = departure;
-        this.destination = destination;
+    public String getDate() {
+        return date;
     }
 
-    public Aircraft getAircraft() {
-        return aircraft;
+    public void setDate(String date) {
+        this.date = date;
     }
 
-    public void setAircraft(Aircraft aircraft) {
-        this.aircraft = aircraft;
+    public String getAircraftModel() {
+        return aircraftModel;
     }
 
-    public String getCode() {
-        return code;
+    public int getCapacity() {
+        return capacity;
     }
 
     public String getDeparture() {
         return departure;
-    }
-
-    public String setCode(String destination){
-        String code = generateFlightCode(destination);
-        return code;
     }
 
     public void setDeparture(String departure) {
@@ -57,12 +51,8 @@ public class Flight {
         this.destination = destination;
     }
 
-    public Time generateDepartureTime() {
-        final Random random = new Random();
-        final int millisInDay = 24*60*60*1000;
-        departureTime = new Time(random.nextInt(millisInDay));
-
-        return departureTime;
+    public void setCapacity(int capacity) {
+        this.capacity = capacity;
     }
 
     public Time getDepartureTime() {
@@ -74,15 +64,8 @@ public class Flight {
         this.departureTime = departureTime;
     }
 
-    public String generateFlightCode(String destination){
-        String code;
-        CodeGenerator codeGen = new CodeGenerator();
-        code = codeGen.genFlightCode(destination);
-        return code;
+    public String toString(){
+        return "[" + this.aircraftModel + ", " + this.departure + this.destination + this.departureTime + "]";
     }
-    public boolean hasSeatAvailable(String flightCode){
 
-
-        return true;
-    }
 }

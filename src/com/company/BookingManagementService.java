@@ -1,67 +1,146 @@
 package com.company;
 
-import sun.security.krb5.internal.Ticket;
 
-import java.sql.Time;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
+import java.sql.*;
+import java.util.Formatter;
+import java.util.Locale;
 
 public class BookingManagementService {
-    HashMap<String,Booking> _booking;
-    private final FlightsManagementService flightMgt;
+    private final Connection con;
+    private PreparedStatement preparedStatement = null;
+    private  ResultSet rs = null;
+    StringBuilder sb = new StringBuilder();
+    Formatter formatter = new Formatter(sb, Locale.US);
 
 
-    public BookingManagementService(FlightsManagementService flightMgt){
-        this.flightMgt = flightMgt;
-        _booking = new HashMap<>();
+    public BookingManagementService(FlightsManagementService flightMgt, Connection con){
+        this.con = con;
     }
 
 
-    public void createNewBooking(String nameOfPassenger, String typeOfFlight, int classOfFlight,
-                                 String dateOfFlight, String bookingId, String destination, String departure){
+    public void createNewBooking(String ticketId, String nameOfPassenger, String typeOfFlight, String classOfFlight,
+                                 String dateOfFlight, String passengerId, String destination, String departure, Time time){
 
-         Booking booking = new Booking(nameOfPassenger, typeOfFlight, classOfFlight,dateOfFlight, destination, departure);
+            try {
+               preparedStatement = con.prepareStatement("insert into booking (ticketId, passengerId, name," +
+                       " destination, departure, date,time,flight_type, flight_class) values (?,?,?,?,?,?,?,?,?)");
 
-        if(_booking.containsValue(bookingId)){
-            throw new UnsupportedOperationException("Flight already Booked");
+               preparedStatement.setString(1,ticketId);
+               preparedStatement.setString(2, passengerId);
+               preparedStatement.setString(3,nameOfPassenger);
+               preparedStatement.setString(4,destination);
+               preparedStatement.setString(5, departure);
+               preparedStatement.setString(6, dateOfFlight);
+               preparedStatement.setString(7, String.valueOf(time));
+               preparedStatement.setString(8, typeOfFlight);
+               preparedStatement.setString(9, classOfFlight);
+
+               preparedStatement.executeUpdate();
+
+            }
+            catch (Exception e){
+                System.out.println("Unable to save aircraft.");
+                e.printStackTrace();
+            }
         }
-        _booking.put(bookingId,booking);
-    }
 
-    public void updateBooking(String nameOfPassenger, String typeOfFlight, int classOfFlight,
-                             String dateOfFlight, String bookingId, String destination, String departure){
 
-        Booking booking = searchBookingById(bookingId);
-        booking.setClassOfFlight(classOfFlight);
-        booking.setDateOfFlight(dateOfFlight);
-        booking.setNameOfPassenger(nameOfPassenger);
-        booking.setTypeOfFlight(typeOfFlight);
-        booking.setDestination(destination);
-        booking.setDeparture(departure);
+    public void updateBooking(Booking booking, String passid){
+        try {
+            preparedStatement = con.prepareStatement("update booking set ticketId = ?, " +
+                            "flight_type =?,flight_class =? where  passengerId =?");
+            preparedStatement.setString(1, booking.getTicketId());
+            preparedStatement.setString(2, booking.getTypeOfFlight());
+            preparedStatement.setString(2, booking.getClassOfFlight());
+            preparedStatement.setString(4, passid);
+            preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            System.out.println("Unable to update record");
+            e.printStackTrace();
+        }
+
     }
 
     public void deleteBooking(String bookingId){
-        _booking.remove(bookingId);
+        try {
+            preparedStatement = con.prepareStatement("delete from booking where ticketId =?");
+            preparedStatement.setString(1,bookingId);
+            preparedStatement.executeUpdate();
+
+            System.out.println("Booking deleted successfully");
+        } catch (SQLException e) {
+            System.out.println("Unable to delete record");
+            e.printStackTrace();
+        }
     }
 
     public Booking searchBookingById(String bookingId){
+        try {
+            preparedStatement = con.prepareStatement("select  * from booking where " +
+                    "ticketId = ?");
+            preparedStatement.setString(1, bookingId);
+            rs = preparedStatement.executeQuery();
 
-        if(!_booking.containsValue(bookingId)){
-            throw new UnsupportedOperationException("Flight not booked");
-        }
-        return _booking.get(bookingId);
-    }
+            while(rs.next()){
+                String passId = rs.getString(2);
+                String passName = rs.getString(3);
+                String dest = rs.getString(4);
+                String dep = rs.getString(5);
+                String date = rs.getString(6);
+                Time time = Time.valueOf(rs.getString(7));
+                String type = rs.getString(8);
+                String classes = rs.getString(9);
 
-    public ArrayList<Booking> searchBooking(String query){
-        ArrayList<Booking> result = new ArrayList<>();
-        for (Booking a:_booking.values()) {
-            if(a.getBookingId().contains(query) || a.getNameOfPassenger().contains(query) || a.getDeparture().contains(query)
-            || a.getDestination().contains(query)){
-                result.add(a);
+                return new Booking(bookingId,passId,passName,dest,dep,date,time,type,classes);
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        return result;
+
+
+        return null;
     }
+
+    public void searchBooking(String query) {
+        formatter.format("**********Search Result*************\n");
+        formatter.format("%1$-25s %2$-10s %3$-15s %4$-10s %5$-10s %6$-10s %7$-15s %8$-20s %9$-10s\n ",
+                "TicketId", "PassengerId", "Name", "Departure", "Destination", "Time", "Date", "Type", "Class");
+
+        try {
+            preparedStatement = con.prepareStatement("select * from booking where? " +
+                    "in(ticketId, passengerId, name, destination, departure, date, time)");
+            preparedStatement.setString(1, query);
+            rs = preparedStatement.executeQuery();
+
+            int count = 0;
+            while (rs.next()) {
+                String ticketId = rs.getString(1);
+                String passId = rs.getString(2);
+                String name = rs.getString(3);
+                String dest = rs.getString(4);
+                String dept = rs.getString(5);
+                String date = rs.getString(6);
+                String time = rs.getString(7);
+                String type = rs.getString(8);
+                String classes = rs.getString(9);
+                count++;
+
+                formatter.format("%1$-25s %2$-10s %3$-15s %4$-10s %5$-10s %6$-10s %7$-15s %8$-20s %9$-10s\n ",
+                        ticketId, passId, name, dept, dest, time, date, type, classes);
+            }
+            if (count > 0){
+                System.out.println(sb.toString());
+            }else{
+                System.out.println("No available booking");
+            }
+        } catch (SQLException e) {
+            System.out.println("invalid query");
+            e.printStackTrace();
+        }
+    }
+
+
+
 
 }
