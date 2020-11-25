@@ -1,0 +1,120 @@
+a5306/tarik/t100
+package com.company;
+
+import java.util.Scanner;
+
+CodeGenerator gen = new CodeGenerator();
+        String code = gen.genBookingCode(nameOfPassenger);
+
+        return code;
+
+public class Seat {
+    final int FirstClass = 1;
+    final int Business = 2;
+    final int Economy = 3;
+    private String seatClass;
+    private int capacity = 100;
+    boolean[] arrSeats = new boolean[capacity];
+
+    public Seat(String seatClass, String flightcode) {
+        this.seatClass = seatClass;
+        this.capacity = capacity;
+    }
+
+    public String getSeatClass() {
+        return seatClass;
+    }
+
+    public void setSeatClass(String seatClass) {
+        this.seatClass = seatClass;
+    }
+
+    public int getCapacity() {
+        return capacity;
+    }
+
+    public void setCapacity(int capacity) {
+        this.capacity = capacity;
+    }
+
+    public int assignSeat(String section){
+
+        switch (section){
+            case FirstClass:
+                if(getFreeSeats(section)> 0){
+                    for (int i = 0; i < 10 ; i++)
+                        if (arrSeats[i] == false){
+                            arrSeats[i] = true;
+                            return i;
+                        }
+                }
+                break;
+            case Economy:
+                if(getFreeSeats(section)> 0){
+                    for (int i = 10; i < 60 ; i++)
+                        if (arrSeats[i] == false){
+                            arrSeats[i] = true;
+                            return i;
+                        }
+                }
+                break;
+
+            case Business:
+                if(getFreeSeats(section)> 0){
+                    for (int i = 60; i < arrSeats.length ; i++)
+                        if (arrSeats[i] == false){
+                            arrSeats[i] = true;
+                            return i;
+                        }
+                }
+                break;
+            default:
+                System.out.printf("All seats in section \"%s\" are booked.\n", section);
+                System.out.printf("Would you like to be moved to another section"+ "Y or N");
+                Scanner sc = new Scanner(System.in);
+                if(sc.next().charAt(0) == 'y'){
+                    System.out.println("1. Firstclass");
+                    System.out.println("2. Business");
+                    System.out.println("3. Economy");
+                    int i = sc.nextInt();
+                    assignSeat(i);
+                }
+                else{
+                    System.out.println("\nNext flight leaves in 3 hours.\n");}
+
+        }
+        return Integer.parseInt(null);
+    }
+
+    private int getFreeSeats(String section){
+        int total = 0;
+        switch (section){
+            case FirstClass:
+                for(int i=0; i<10; i++){
+                    if(arrSeats[i] == false)
+                        total += 1;
+                }
+            case Business:
+                for(int i=10; i<60; i++){
+                    if(arrSeats[i] == false)
+                    total += 1;
+            }
+            case Economy:
+                for(int i=60; i<arrSeats.length; i++){
+                    if(arrSeats[i] == false)
+                        total += 1;
+                }
+        }
+        return total;
+    }
+    public boolean seatsAvailable(){
+        for(boolean seat : arrSeats)
+            if(seat == false)
+                return true;
+
+        return false;
+    }
+}
+
+
+

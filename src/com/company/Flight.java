@@ -11,6 +11,7 @@ public class Flight {
 
     public Flight(String departure, String destination, Time departureTime,String date,
                   String aircraftModel) {
+        //flight should contain aircraft not aircraft model.
 
         this.departure = departure;
         this.destination = destination;

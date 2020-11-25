@@ -1,12 +1,5 @@
 package com.company;
-
-import javax.xml.bind.SchemaOutputResolver;
 import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Formatter;
-import java.util.Locale;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -23,7 +16,6 @@ public class AircraftMenu {
 
     public void process() {
         System.out.println("7. Quit");
-        System.out.println("0. Return");
         System.out.println("1. Create aircraft");
         System.out.println("2. Update aircraft");
         System.out.println("3. Delete aircraft");
@@ -68,12 +60,23 @@ public class AircraftMenu {
         System.out.println("Input model of aircraft");
         String model = input.next();
 
-        System.out.println("Input capacity of aircraft");
-        int capacity = input.nextInt();
+        boolean test = true;
+            while (test) {
+                System.out.println("Input capacity of aircraft");
+                String cap = input.next();
+                int capacity;
+                boolean check = isNumeric(cap);
+                if (check) {
+                    capacity = Integer.parseInt(cap);
+                    System.out.println("Processing.........");
 
-        System.out.println("Processing.........");
+                    aircraftManagementService.createAircraft(name, model, capacity);
+                    test = false;
+                }
+            }
 
-        aircraftManagementService.createAircraft(name, model, capacity);
+
+
 
         System.out.println("Select 0 to return to perform another operation; 6 to return to main menu; 7 to quit");
     }
@@ -142,6 +145,20 @@ public class AircraftMenu {
 
         aircraftManagementService.searchAircraft(query);
         System.out.println("Select 0 to return to perform another operation; 6 to return to main menu; 7 to quit");
+    }
+    private boolean isNumeric(String string){
+        if (string == null || string.length() == 0){
+            System.out.println("Empty value not allowed");
+            return false;
+        }else{
+            try{
+                Integer.parseInt(string);
+                return true;
+            }catch (NumberFormatException e){
+                System.out.println("Integer digits allowed only");
+                return false;
+            }
+        }
     }
 
 }

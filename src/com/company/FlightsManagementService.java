@@ -12,7 +12,8 @@ public class FlightsManagementService {
     private final Time departureTime;
     private final AircraftManagementService aircraftManagementService;
 
-    public FlightsManagementService(AircraftManagementService aircraftManagementService, Connection con){
+    public FlightsManagementService(
+            AircraftManagementService aircraftManagementService, Connection con){
         this.con = con;
         this.aircraftManagementService = aircraftManagementService;
         Generator gen = new Generator();
